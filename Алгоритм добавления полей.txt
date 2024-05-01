@@ -1,0 +1,41 @@
+1) Мердж новых данных, обновление:
+
+ALTER TABLE CUBE_OSAGO_UL_INS
+    ADD adi_agent varchar2(250 char);
+MERGE INTO CUBE_OSAGO_UL_DATA mt
+USING (
+    SELECT *
+    FROM RTDM_CUBE.CUBE_OSAGO_UL_ADI_TO_RTDM
+) dt
+ON (mt.RUN_ID = dt.RUN_ID and mt.PROD_ID = dt.PROD_ID)
+WHEN MATCHED THEN UPDATE SET
+mt.adi_agent = dt.AGENT_NAME,
+mt.adi_issue_date = dt.ISSUE_DATE,
+mt.adi_sales_channel = dt.SALES_CHANNEL,
+mt.adi_agent_kv = dt.AGENT_KV,
+mt.adi_premium_calc = dt.PREMIUM_CALC,
+mt.adi_fillial_name = dt.FILIAL_NAME
+
+2)Добавление полей в процедуру и связанные таблицы, скомпеллировать процедуру и протестить ее:
+SET SERVEROUTPUT ON SIZE UNLIMITED;
+execute cube_osago_ul_processing.sp_osago_ul_execute;
+
+3)Добавление полей во вьюху
+
+4)Добавление атрибутов/мер в куб и обновление его
+
+Бакеты:
+
+1)Сделать разбивку на группы по полю
+
+2)Создать вьюху с группами:
+CREATE OR REPLACE FORCE EDITIONABLE VIEW "UNDWR_SANDBOX"."CUBE_OSAGO_UL_ELRS_BUCKET_V" ("VALUE", "NAME") AS 
+SELECT 5 value,  '0 - 0,005' name from dual
+union
+SELECT 7 value, '0,005 - 0,007' name from dual
+union
+SELECT 24 value, '0,007 - 0,024' name from dual
+union
+SELECT 1000000 value, '0,024 >' name from dual
+
+3)Внести изменения во вьюху и куб
